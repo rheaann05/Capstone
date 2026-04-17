@@ -19,14 +19,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 2. Create a default Type of Tenant
-        // FIXED: Changed 'name' to 'type' based on your migration!
         $tenantType = TypeOfTenant::firstOrCreate(
             ['id' => 1],
             ['type' => 'System Platform'] 
         );
 
         // 3. Create the System Default Tenant
-        // FIXED: Added address, contact_number, and email because your migration requires them!
         $tenant = Tenant::firstOrCreate(
             ['id' => 1], 
             [

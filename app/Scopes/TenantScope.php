@@ -22,8 +22,7 @@ class TenantScope implements Scope
             $user = Auth::user();
 
             if (!$user->hasRole('super-admin')) {
-                // TRICK: Wrap it in an array! 
-                // This forces VS Code to recognize the exact method signature.
+              
                 $builder->where([
                     $model->getTable() . '.tenant_id' => $user->tenant_id
                 ]);

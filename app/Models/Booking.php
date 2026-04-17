@@ -25,17 +25,13 @@ class Booking extends Model
         'check_out' => 'date',
     ];
 
-    /**
-     * 访问器：确保 check_in 始终返回 Carbon 实例
-     */
+   
     public function getCheckInAttribute($value): ?Carbon
     {
         return $value ? Carbon::parse($value) : null;
     }
 
-    /**
-     * 访问器：确保 check_out 始终返回 Carbon 实例
-     */
+    
     public function getCheckOutAttribute($value): ?Carbon
     {
         return $value ? Carbon::parse($value) : null;

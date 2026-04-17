@@ -18,6 +18,6 @@ class RoleSeeder extends Seeder
         // 2. Give the Tenant Admin their specific permissions
         $tenantAdminRole->givePermissionTo(Permission::all()); 
         
-        // Note: We don't need to assign permissions to the super-admin because of the Gate::before bypass we just added!
+      
     }
 }

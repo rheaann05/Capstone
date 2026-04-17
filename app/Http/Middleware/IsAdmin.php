@@ -10,7 +10,6 @@ class IsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Now using the Spatie package method
         if ($request->user() && $request->user()->hasRole('admin')) { 
             return $next($request);
         }

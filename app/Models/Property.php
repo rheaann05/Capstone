@@ -16,7 +16,7 @@ class Property extends Model
     'price',
     'capacity',
     'status',
-    'is_active', // <-- Add this!
+    'is_active',
 ];
 
     public function propertyType() { return $this->belongsTo(PropertyType::class); }

@@ -15,9 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            
-            // NO MORE tourist_spot_id HERE!
-            
             $table->string('booking_reference')->unique();
             $table->date('check_in');
             $table->date('check_out');

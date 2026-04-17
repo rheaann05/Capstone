@@ -17,19 +17,19 @@ class BookingPolicy
 
     public function view(User $user, Booking $booking): bool
     {
-        // Fixed: checking tenant_id directly on the booking
+        // checking tenant_id directly on the booking
         return $user->tenant_id === $booking->tenant_id;
     }
 
     public function update(User $user, Booking $booking): bool
     {
-        // Fixed: checking tenant_id directly on the booking
+        // checking tenant_id directly on the booking
         return $user->tenant_id === $booking->tenant_id;
     }
 
     public function delete(User $user, Booking $booking): bool
     {
-        // Fixed: checking tenant_id directly on the booking
+        // checking tenant_id directly on the booking
         return $user->tenant_id === $booking->tenant_id;
     }
 }

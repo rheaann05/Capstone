@@ -10,7 +10,6 @@ class IsTenantAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Allow if they are a regular admin OR a super admin
         if ($request->user() && $request->user()->hasAnyRole(['admin', 'super-admin'])) { 
             return $next($request);
         }
