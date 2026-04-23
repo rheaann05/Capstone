@@ -17,13 +17,17 @@
 
 <body class="bg-white dark:bg-black text-black dark:text-white font-sans antialiased">
 
-    <x-headers.tenant-header />
+    <x-headers.tenant.tenant-header />
 
     <main class="min-h-screen p-8">
-        {{ $slot }}
+        @if(isset($slot))
+            {{ $slot }}
+        @else
+            @yield('content')
+        @endif
     </main>
 
-    <x-footers.tenant-footer />
+    <x-footers.tenant.tenant-footer />
 
     @livewireScripts
 </body>

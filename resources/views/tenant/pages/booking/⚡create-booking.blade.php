@@ -10,42 +10,49 @@ use App\Models\Property;
 use App\Models\Service;
 use App\Models\BookingItem;
 use App\Models\BookingService;
+use App\Models\Payment;
+use App\Services\PayMongoService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 new 
 #[Layout('tenant.layouts.app')]
-#[Title('Create Booking')]
+#[Title('Walk‑In Checkout')]
 class extends Component {
+    // Customer fields (only name and phone required)
     #[Validate('required|string|max:255')]
     public $customerName = '';
     
-    #[Validate('nullable|string|max:20')]
+    #[Validate('required|string|max:20')]
     public $customerPhone = '';
     
-    #[Validate('nullable|email|max:255')]
+    // Optional email for online payments
     public $customerEmail = '';
-    
-    #[Validate('nullable|string')]
-    public $customerAddress = '';
+    public $customerAddress = ''; // hidden from UI, set empty
 
-    #[Validate('nullable|exists:customers,id')]
-    public $existingCustomerId = '';
-    
-    public $customerSearch = '';
-    public $showExistingCustomerDropdown = false;
-
+    // Booking dates
     #[Validate('required|date|after_or_equal:today')]
     public $check_in;
+    
     #[Validate('required|date|after:check_in')]
     public $check_out;
+    
     public $booking_reference;
-    public $notes;
-
+    public $totalAmount = 0;
     public $selectedProperties = [];
     public $selectedServices = [];
-    public $totalAmount = 0;
+    
+    // Payment fields
+    #[Validate('required|in:cash,card,gcash,paymaya')]
+    public $payment_method = 'cash';
+    
+    #[Validate('nullable|string|max:255')]
+    public $reference_number = '';
+    
+    // Hold the created booking ID for redirect
+    public $createdBookingId = null;
 
     public function mount()
     {
@@ -70,41 +77,6 @@ class extends Component {
     public function updatedCheckOut()
     {
         $this->calculateTotal();
-    }
-
-    public function updatedExistingCustomerId($value)
-    {
-        if ($value) {
-            $customer = Customer::find($value);
-            if ($customer) {
-                $this->customerName = $customer->name;
-                $this->customerPhone = $customer->phone;
-                $this->customerEmail = $customer->email;
-                $this->customerAddress = $customer->address;
-            }
-        } else {
-            $this->reset(['customerName', 'customerPhone', 'customerEmail', 'customerAddress']);
-        }
-    }
-
-    public function selectExistingCustomer($id)
-    {
-        $this->existingCustomerId = $id;
-        $customer = Customer::find($id);
-        if ($customer) {
-            $this->customerName = $customer->name;
-            $this->customerPhone = $customer->phone;
-            $this->customerEmail = $customer->email;
-            $this->customerAddress = $customer->address;
-        }
-        $this->showExistingCustomerDropdown = false;
-        $this->customerSearch = '';
-    }
-
-    public function clearExistingCustomer()
-    {
-        $this->existingCustomerId = '';
-        $this->reset(['customerName', 'customerPhone', 'customerEmail', 'customerAddress']);
     }
 
     public function addProperty($propertyId, $price)
@@ -170,18 +142,6 @@ class extends Component {
         $this->totalAmount = $total;
     }
 
-    public function getFilteredCustomersProperty()
-    {
-        if (empty($this->customerSearch)) {
-            return collect();
-        }
-        return Customer::where('name', 'like', '%' . $this->customerSearch . '%')
-            ->orWhere('phone', 'like', '%' . $this->customerSearch . '%')
-            ->orderBy('name')
-            ->limit(10)
-            ->get();
-    }
-
     public function getAvailablePropertiesProperty()
     {
         if (!$this->check_in || !$this->check_out) {
@@ -191,17 +151,15 @@ class extends Component {
         $checkIn = $this->check_in;
         $checkOut = $this->check_out;
 
-        // Get all active and available properties
         $properties = Property::where('is_active', true)
             ->where('status', 'available')
             ->orderBy('name')
             ->get();
 
-        // Filter out properties that have conflicting bookings
         $available = $properties->filter(function ($property) use ($checkIn, $checkOut) {
             $hasConflict = BookingItem::where('property_id', $property->id)
                 ->whereHas('booking', function ($query) use ($checkIn, $checkOut) {
-                    $query->where('status', '!=', 'cancelled')
+                    $query->whereNotIn('status', ['cancelled', 'completed'])
                         ->where('check_in', '<', $checkOut)
                         ->where('check_out', '>', $checkIn);
                 })
@@ -217,87 +175,139 @@ class extends Component {
         return Service::where('is_active', true)->orderBy('name')->get();
     }
 
-    public function save()
+    public function submit()
     {
         if (empty($this->selectedProperties)) {
             session()->flash('error', 'Please select at least one property.');
             return;
         }
 
-        if (!$this->existingCustomerId) {
-            $this->validate([
-                'customerName' => 'required|string|max:255',
-                'customerPhone' => 'nullable|string|max:20',
-                'customerEmail' => 'nullable|email|max:255',
-                'customerAddress' => 'nullable|string',
-            ]);
-        } else {
-            $this->validate(['existingCustomerId' => 'required|exists:customers,id']);
-        }
-
         $this->validate([
+            'customerName' => 'required|string|max:255',
+            'customerPhone' => 'required|string|max:20',
             'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
+            'payment_method' => 'required|in:cash,card,gcash,paymaya',
         ]);
 
         if (!$this->booking_reference) {
             $this->generateBookingReference();
         }
 
-        $customerId = $this->existingCustomerId;
-        if (!$customerId) {
+        DB::transaction(function () {
+            // Create customer (address and email optional, set empty if not provided)
             $customer = Customer::create([
                 'tenant_id' => Auth::user()->tenant_id,
                 'name' => $this->customerName,
                 'phone' => $this->customerPhone,
-                'email' => $this->customerEmail,
-                'address' => $this->customerAddress,
+                'email' => $this->customerEmail ?: null,
+                'address' => $this->customerAddress ?: null,
             ]);
-            $customerId = $customer->id;
-        }
 
-        $booking = Booking::create([
-            'tenant_id' => Auth::user()->tenant_id,
-            'customer_id' => $customerId,
-            'booking_reference' => $this->booking_reference,
-            'check_in' => $this->check_in,
-            'check_out' => $this->check_out,
-            'total_amount' => $this->totalAmount,
-            'status' => 'pending',
+            // Create booking
+            $booking = Booking::create([
+                'tenant_id' => Auth::user()->tenant_id,
+                'customer_id' => $customer->id,
+                'booking_reference' => $this->booking_reference,
+                'check_in' => $this->check_in,
+                'check_out' => $this->check_out,
+                'total_amount' => $this->totalAmount,
+                'status' => 'pending',
+            ]);
+
+            $nights = Carbon::parse($this->check_in)->diffInDays($this->check_out);
+            $nights = max(1, $nights);
+
+            foreach ($this->selectedProperties as $propertyId => $item) {
+                BookingItem::create([
+                    'tenant_id' => Auth::user()->tenant_id,
+                    'booking_id' => $booking->id,
+                    'property_id' => $propertyId,
+                    'price' => $item['price'],
+                    'quantity' => $item['quantity'],
+                    'subtotal' => $item['price'] * $item['quantity'] * $nights,
+                ]);
+            }
+
+            foreach ($this->selectedServices as $serviceId => $item) {
+                BookingService::create([
+                    'tenant_id' => Auth::user()->tenant_id,
+                    'booking_id' => $booking->id,
+                    'service_id' => $serviceId,
+                    'quantity' => $item['quantity'],
+                    'subtotal' => $item['price'] * $item['quantity'],
+                ]);
+            }
+
+            $this->createdBookingId = $booking->id;
+
+            // If cash, record payment as paid immediately
+            if ($this->payment_method === 'cash') {
+                Payment::create([
+                    'tenant_id' => Auth::user()->tenant_id,
+                    'booking_id' => $booking->id,
+                    'amount' => $this->totalAmount,
+                    'payment_method' => 'cash',
+                    'payment_status' => 'paid',
+                    'reference_number' => $this->reference_number,
+                    'paid_at' => now(),
+                ]);
+            }
+        });
+
+        // Handle post‑creation redirect
+        if ($this->payment_method === 'cash') {
+            session()->flash('message', 'Booking created and payment recorded.');
+            return $this->redirectRoute('tenant.bookings.show', ['booking' => $this->createdBookingId], navigate: true);
+        } else {
+            // Online payment: create pending payment and redirect to PayMongo
+            return $this->initiateOnlinePayment();
+        }
+    }
+
+    protected function initiateOnlinePayment()
+    {
+        $booking = Booking::find($this->createdBookingId);
+        $customer = $booking->customer;
+
+        $payMongo = app(PayMongoService::class);
+        $session = $payMongo->createCheckoutSession([
+            'customer_name' => $customer->name,
+            'customer_email' => $customer->email ?? 'guest@example.com',
+            'customer_phone' => $customer->phone,
+            'amount' => $this->totalAmount,
+            'description' => "Booking #{$booking->booking_reference}",
+            'item_name' => 'Accommodation Payment',
+            'success_url' => route('tenant.payments.success', ['booking' => $booking->id]),
+            'cancel_url' => route('tenant.payments.cancel', ['booking' => $booking->id]),
+            'metadata' => [
+                'booking_id' => $booking->id,
+                'tenant_id' => Auth::user()->tenant_id,
+            ],
+            'payment_method_types' => [$this->payment_method],
         ]);
 
-        $nights = Carbon::parse($this->check_in)->diffInDays($this->check_out);
-        $nights = max(1, $nights);
-
-        foreach ($this->selectedProperties as $propertyId => $item) {
-            BookingItem::create([
-                'tenant_id' => Auth::user()->tenant_id,
-                'booking_id' => $booking->id,
-                'property_id' => $propertyId,
-                'price' => $item['price'],
-                'quantity' => $item['quantity'],
-                'subtotal' => $item['price'] * $item['quantity'] * $nights,
-            ]);
+        if (!$session) {
+            session()->flash('error', 'Unable to initiate payment. Please try again.');
+            return $this->redirectRoute('tenant.bookings.show', ['booking' => $booking->id], navigate: true);
         }
 
-        foreach ($this->selectedServices as $serviceId => $item) {
-            BookingService::create([
-                'tenant_id' => Auth::user()->tenant_id,
-                'booking_id' => $booking->id,
-                'service_id' => $serviceId,
-                'quantity' => $item['quantity'],
-                'subtotal' => $item['price'] * $item['quantity'],
-            ]);
-        }
+        // Create pending payment record
+        Payment::create([
+            'tenant_id' => Auth::user()->tenant_id,
+            'booking_id' => $booking->id,
+            'amount' => $this->totalAmount,
+            'payment_method' => $this->payment_method,
+            'payment_status' => 'unpaid',
+            'paymongo_session_id' => $session['data']['id'],
+        ]);
 
-        session()->flash('message', 'Booking created successfully.');
-        return $this->redirectRoute('tenant.bookings.index', navigate: true);
+        return redirect()->away($session['data']['attributes']['checkout_url']);
     }
 };
 ?>
-
 <div class="p-6 max-w-7xl mx-auto">
-    <h1 class="text-2xl font-bold mb-6">New Booking</h1>
+    <h1 class="text-2xl font-bold mb-6">Walk‑In Checkout</h1>
 
     @if (session()->has('error'))
         <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -305,83 +315,41 @@ class extends Component {
         </div>
     @endif
 
-    <form wire:submit="save" class="space-y-6">
-        {{-- Customer Information --}}
+    <form wire:submit="submit" class="space-y-6">
+        {{-- Customer Information (Minimal) --}}
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-4">Customer Information</h2>
-
-            {{-- Search existing customer (optional) --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Find existing customer (optional)</label>
-                <div class="relative">
-                    <input type="text" wire:model.live="customerSearch" 
-                           @focus="$wire.showExistingCustomerDropdown = true"
-                           @blur="setTimeout(() => $wire.showExistingCustomerDropdown = false, 200)"
-                           placeholder="Search by name or phone..." 
-                           class="w-full rounded-lg border-slate-300 pr-10">
-                    @if($existingCustomerId)
-                        <button type="button" wire:click="clearExistingCustomer" class="absolute right-2 top-2 text-slate-400 hover:text-red-500">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    @endif
-                </div>
-                @if($showExistingCustomerDropdown && count($this->filteredCustomers) > 0)
-                    <div class="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                        @foreach($this->filteredCustomers as $customer)
-                            <div wire:click="selectExistingCustomer({{ $customer->id }})" class="px-4 py-2 hover:bg-slate-50 cursor-pointer">
-                                <span class="font-medium">{{ $customer->name }}</span>
-                                <span class="text-sm text-slate-500 ml-2">{{ $customer->phone }}</span>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-                @if($existingCustomerId)
-                    <p class="text-xs text-green-600 mt-1">✓ Using existing customer</p>
-                @endif
-            </div>
-
-            {{-- New Customer Form (always visible) --}}
+            <h2 class="text-lg font-semibold mb-4">Guest Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">Full Name *</label>
-                    <input type="text" wire:model="customerName" class="w-full rounded-lg border-slate-300" placeholder="Enter guest name">
+                    <input type="text" wire:model="customerName" class="w-full rounded-lg border-slate-300" placeholder="Guest name">
                     @error('customerName') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Phone</label>
+                    <label class="block text-sm font-medium mb-1">Phone *</label>
                     <input type="text" wire:model="customerPhone" class="w-full rounded-lg border-slate-300" placeholder="Contact number">
                     @error('customerPhone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" wire:model="customerEmail" class="w-full rounded-lg border-slate-300" placeholder="Email address">
-                    @error('customerEmail') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Address</label>
-                    <input type="text" wire:model="customerAddress" class="w-full rounded-lg border-slate-300" placeholder="Residential address">
-                    @error('customerAddress') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                </div>
             </div>
-            <p class="text-xs text-slate-400 mt-2">* Required fields. Fill in new customer details or search above to reuse an existing one.</p>
+            <p class="text-xs text-slate-400 mt-2">* Required for walk‑in.</p>
         </div>
 
         {{-- Dates & Reference --}}
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-4">Booking Details</h2>
+            <h2 class="text-lg font-semibold mb-4">Stay Details</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Check-in Date *</label>
+                    <label class="block text-sm font-medium mb-1">Check‑in *</label>
                     <input type="date" wire:model.live="check_in" class="w-full rounded-lg border-slate-300">
                     @error('check_in') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Check-out Date *</label>
+                    <label class="block text-sm font-medium mb-1">Check‑out *</label>
                     <input type="date" wire:model.live="check_out" class="w-full rounded-lg border-slate-300">
                     @error('check_out') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Booking Reference</label>
+                    <label class="block text-sm font-medium mb-1">Booking Ref</label>
                     <input type="text" wire:model="booking_reference" class="w-full rounded-lg border-slate-300 bg-slate-50" readonly>
                     <button type="button" wire:click="generateBookingReference" class="text-xs text-blue-600 mt-1">Generate New</button>
                 </div>
@@ -390,24 +358,24 @@ class extends Component {
 
         {{-- Property Selection --}}
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-4">Select Properties</h2>
+            <h2 class="text-lg font-semibold mb-4">Select Room(s)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 @forelse($this->availableProperties as $property)
                     <div class="border rounded-lg p-3 flex justify-between items-center">
                         <div>
                             <p class="font-medium">{{ $property->name }}</p>
-                            <p class="text-sm text-slate-500">₱{{ number_format($property->price, 2) }} / night • Capacity: {{ $property->capacity }}</p>
+                            <p class="text-sm text-slate-500">₱{{ number_format($property->price, 2) }} / night • Cap: {{ $property->capacity }}</p>
                         </div>
                         <button type="button" wire:click="addProperty({{ $property->id }}, {{ $property->price }})" class="text-blue-600 hover:bg-blue-50 px-3 py-1 rounded">Add</button>
                     </div>
                 @empty
-                    <p class="text-slate-500 col-span-2">No available properties for selected dates.</p>
+                    <p class="text-slate-500 col-span-2">No available rooms for selected dates.</p>
                 @endforelse
             </div>
             @if(count($selectedProperties))
-                <h3 class="font-medium mb-2">Selected Properties</h3>
+                <h3 class="font-medium mb-2">Selected Rooms</h3>
                 <table class="w-full text-sm">
-                    <thead><tr class="text-slate-500"><th class="text-left">Property</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
+                    <thead><tr class="text-slate-500"><th class="text-left">Room</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
                     <tbody>
                         @foreach($selectedProperties as $id => $item)
                             @php 
@@ -416,7 +384,7 @@ class extends Component {
                                 $nights = max(1, $nights);
                             @endphp
                             <tr>
-                                <td>{{ $property->name ?? 'Property' }}</td>
+                                <td>{{ $property->name ?? 'Room' }}</td>
                                 <td>₱{{ number_format($item['price'], 2) }}</td>
                                 <td><input type="number" wire:model.live="selectedProperties.{{ $id }}.quantity" min="1" class="w-16 border rounded text-center"></td>
                                 <td>₱{{ number_format($item['price'] * $item['quantity'] * $nights, 2) }}</td>
@@ -428,9 +396,9 @@ class extends Component {
             @endif
         </div>
 
-        {{-- Service Selection --}}
+        {{-- Services (Optional) --}}
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h2 class="text-lg font-semibold mb-4">Add Services (Optional)</h2>
+            <h2 class="text-lg font-semibold mb-4">Add‑On Services</h2>
             <div class="flex flex-wrap gap-2 mb-4">
                 @foreach($this->availableServices as $service)
                     <button type="button" wire:click="addService({{ $service->id }}, {{ $service->price }})" class="border rounded-full px-4 py-2 text-sm hover:bg-slate-50">
@@ -457,11 +425,36 @@ class extends Component {
             @endif
         </div>
 
-        {{-- Total & Submit --}}
+        {{-- Payment Method --}}
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h2 class="text-lg font-semibold mb-4">Payment</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Payment Method *</label>
+                    <select wire:model.live="payment_method" class="w-full rounded-lg border-slate-300">
+                        <option value="cash">Cash</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="gcash">GCash</option>
+                        <option value="paymaya">PayMaya</option>
+                    </select>
+                    @error('payment_method') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+                @if($payment_method === 'cash')
+                <div>
+                    <label class="block text-sm font-medium mb-1">Reference (Optional)</label>
+                    <input type="text" wire:model="reference_number" class="w-full rounded-lg border-slate-300" placeholder="e.g. Receipt #">
+                </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Total & Actions --}}
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex justify-between items-center">
             <span class="text-xl font-bold">Total: ₱{{ number_format($totalAmount, 2) }}</span>
             <div class="flex gap-3">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">Create Booking</button>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
+                    {{ $payment_method === 'cash' ? 'Complete Checkout' : 'Proceed to Pay' }}
+                </button>
                 <a href="{{ route('tenant.bookings.index') }}" wire:navigate class="border px-6 py-2 rounded-lg hover:bg-slate-50">Cancel</a>
             </div>
         </div>

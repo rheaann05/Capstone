@@ -16,9 +16,10 @@ return new class extends Migration
     $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
     $table->foreignId('booking_id')->constrained('bookings')->cascadeOnDelete();
     $table->decimal('amount', 10, 2);
-    $table->string('payment_method'); // cash, gcash, card
-    $table->string('payment_status'); // paid, partial, unpaid
+    $table->string('payment_method');
+    $table->string('payment_status');
     $table->string('reference_number')->nullable();
+    $table->string('paymongo_session_id')->nullable();  
     $table->timestamp('paid_at')->nullable();
     $table->timestamps();
 });

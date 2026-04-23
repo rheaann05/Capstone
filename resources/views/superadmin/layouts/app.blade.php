@@ -12,15 +12,24 @@
     @livewireStyles
 </head>
 
-<body class="bg-white dark:bg-black text-black dark:text-white font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased" x-data="{ sidebarOpen: false }">
+    
+    {{-- Sidebar --}}
+    <x-headers.admin.sidebar />
 
-    <x-headers.superadmin-header />
+    {{-- Main Content Wrapper --}}
+    <div class="lg:pl-72">
+        {{-- Header --}}
+        <x-headers.admin.superadmin-header />
 
-    <main class="min-h-screen p-8">
-        {{ $slot }}
-    </main>
+        {{-- Page Content --}}
+        <main class="py-8 px-4 sm:px-6 lg:px-8">
+            {{ $slot }}
+        </main>
 
-    <x-footers.superadmin-footer />
+        {{-- Footer --}}
+        <x-footers.admin.superadmin-footer />
+    </div>
 
     @livewireScripts
 </body>

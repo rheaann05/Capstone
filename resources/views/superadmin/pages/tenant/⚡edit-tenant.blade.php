@@ -6,7 +6,9 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Computed;
 use App\Models\Tenant;
 use App\Models\TypeOfTenant;
+use App\Models\User;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 new 
 #[Layout('superadmin.layouts.app')]
@@ -34,7 +36,6 @@ class extends Component {
     {
         $this->tenantRecord = $tenant;
         
-        // Mapped to the CORRECT database columns
         $this->name = $tenant->name;
         $this->slug = $tenant->slug;
         $this->type_of_tenant_id = $tenant->type_of_tenant_id;
@@ -47,30 +48,66 @@ class extends Component {
 
     public function updatedName($value)
     {
-        // Auto-update the slug when the name changes, just like in Create
         $this->slug = Str::slug($value);
     }
 
     public function update()
     {
         $validated = $this->validate([
-            'name' => 'required|min:3|max:255|unique:tenants,name,' . $this->tenantRecord->id,
-            'slug' => 'required|string|max:255|unique:tenants,slug,' . $this->tenantRecord->id,
-            'type_of_tenant_id' => 'required|integer',
-            'email' => 'required|email|unique:tenants,email,' . $this->tenantRecord->id,
+            'name' => [
+                'required', 'min:3', 'max:255',
+                Rule::unique('tenants', 'name')->ignore($this->tenantRecord->id),
+            ],
+            'slug' => [
+                'required', 'string', 'max:255',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('tenants', 'slug')->ignore($this->tenantRecord->id),
+            ],
+            'type_of_tenant_id' => 'required|integer|exists:type_of_tenants,id',
+            'email' => [
+                'required', 'email', 'max:255',
+                Rule::unique('tenants', 'email')->ignore($this->tenantRecord->id),
+                // Ensure email is also unique in users table, except for this tenant's admin user
+                function ($attribute, $value, $fail) {
+                    $adminUser = User::where('tenant_id', $this->tenantRecord->id)
+                                    ->where('email', $value)
+                                    ->first();
+                    
+                    $exists = User::where('email', $value)
+                        ->when($adminUser, fn($q) => $q->where('id', '!=', $adminUser->id))
+                        ->exists();
+                    
+                    if ($exists) {
+                        $fail('This email is already in use by another user account.');
+                    }
+                },
+            ],
             'address' => 'required|string|max:255',
-            'contact_number' => 'nullable|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'contact_number' => 'nullable|string|max:20|regex:/^[0-9\+\-\s\(\)]+$/',
+            'latitude' => 'required|numeric|min:-90|max:90',
+            'longitude' => 'required|numeric|min:-180|max:180',
+        ], [
+            'slug.regex' => 'The slug may only contain lowercase letters, numbers, and hyphens.',
         ]);
 
         $this->tenantRecord->update($validated);
+
+        // If email changed, update the associated admin user's email as well
+        if ($this->tenantRecord->wasChanged('email')) {
+            $adminUser = User::where('tenant_id', $this->tenantRecord->id)
+                            ->whereHas('roles', fn($q) => $q->where('name', 'admin'))
+                            ->first();
+            if ($adminUser) {
+                $adminUser->update(['email' => $this->email]);
+            }
+        }
 
         session()->flash('message', 'Business Location successfully updated!');
         return $this->redirectRoute('superadmin.tenants.index', navigate: true);
     }
 };
 ?>
+<!-- Blade template remains exactly the same -->
 
 <div>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" data-navigate-once />

@@ -28,7 +28,7 @@ class extends Component {
     #[Validate('required|integer|min:1')]
     public $capacity = 1;
     
-    #[Validate('required|numeric|min:0')]
+    #[Validate('required|numeric|min:0|max:99999999.99')]
     public $price = 0.00;
     
     #[Validate('required|in:available,occupied,maintenance')]

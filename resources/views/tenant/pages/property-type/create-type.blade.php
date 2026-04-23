@@ -5,14 +5,34 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use App\Models\PropertyType;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 new 
 #[Layout('tenant.layouts.app')]
 #[Title('Create Custom Property Type')]
 class extends Component {
     
-    #[Validate('required|min:2|max:255|unique:property_types,name')]
+    #[Validate]
     public string $name = '';
+
+    public function rules()
+    {
+        return [
+            'name' => [
+                'required',
+                'min:2',
+                'max:255',
+                // Unique among types available to this tenant
+                Rule::unique('property_types', 'name')->where(function ($query) {
+                    $query->where(function ($q) {
+                        $q->whereNull('tenant_id')
+                          ->orWhere('tenant_id', Auth::user()->tenant_id);
+                    });
+                }),
+            ],
+        ];
+    }
 
     public function save()
     {
@@ -20,7 +40,7 @@ class extends Component {
 
         PropertyType::create([
             'name' => trim($this->name),
-            // tenant_id is automatically set by BelongsToTenant trait
+            // tenant_id automatically set by BelongsToTenant trait
         ]);
 
         session()->flash('success', 'Custom property type created successfully.');
@@ -41,7 +61,7 @@ class extends Component {
                 <label class="block text-sm font-medium text-slate-700 mb-1">Type Name</label>
                 <input type="text" wire:model="name" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. Executive Suite, Family Cottage">
                 @error('name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                <p class="text-xs text-slate-400 mt-1">This type will only be available to your business.</p>
+                <p class="text-xs text-slate-400 mt-1">This type will only be available to your business. Avoid duplicating existing global or custom names.</p>
             </div>
 
             <div class="flex items-center gap-3 pt-4 border-t border-slate-100">

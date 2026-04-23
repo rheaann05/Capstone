@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Middleware\Authenticate;
 use App\Http\Middleware\IsSuperAdmin;
 use App\Http\Middleware\IsTenantAdmin;
+use App\Models\Booking;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,12 @@ Route::livewire('/learn-more', 'public::pages.learnmore')->name('learnmore');
 Route::livewire('/menu-list', 'public::pages.menu-list')->name('menu-list');
 Route::livewire('/reservation', 'public::pages.reservation')->name('reservation');
 
+// Explore Map (public interactive map)
+Route::livewire('/explore/map', 'public::pages.explore-map')->name('explore.map');
+
+// Tenant Profile / Details (public view of a business)
+Route::livewire('/business/{slug}', 'public::pages.tenant-show')->name('tenant.show');
+
 // Tourist Spot Details Profile (Public View)
 Route::livewire('/destination/{id}', 'public::pages.tourist-spot-details')->name('destination.details');
 
@@ -29,9 +36,14 @@ Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    
+
     return redirect()->route('login');
 })->name('logout');
+
+// Authenticated Customer Routes (Booking, etc.)
+Route::middleware(['auth'])->group(function () {
+    Route::livewire('/booking/create/{property}', 'public::pages.create-booking')->name('booking.create');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -55,16 +67,11 @@ Route::prefix('platform')->name('superadmin.')->middleware([Authenticate::class,
     Route::livewire('/tenants', 'superadmin::pages.tenant.view-tenant')->name('tenants.index');
     Route::livewire('/tenants/create', 'superadmin::pages.tenant.create-tenant')->name('tenants.create');
     Route::livewire('/tenants/{tenant}/edit', 'superadmin::pages.tenant.edit-tenant')->name('tenants.edit');
-    
+
     // Roles
     Route::livewire('/roles', 'superadmin::pages.role.view-role')->name('roles.index');
     Route::livewire('/roles/create', 'superadmin::pages.role.create-role')->name('roles.create');
     Route::livewire('/roles/{role}/edit', 'superadmin::pages.role.edit-role')->name('roles.edit');
-    
-    // Property Types
-    Route::livewire('/property-types', 'superadmin::pages.property-type.view-type')->name('property-types.index');
-    Route::livewire('/property-types/create', 'superadmin::pages.property-type.create-type')->name('property-types.create');
-    Route::livewire('/property-types/{type}/edit', 'superadmin::pages.property-type.edit-type')->name('property-types.edit');
 
     // Tenant Types (Business Categories)
     Route::livewire('/tenant-types', 'superadmin::tenant-type.view-type')->name('tenant-types.index');
@@ -88,6 +95,10 @@ Route::prefix('admin')->name('tenant.')->middleware([Authenticate::class, IsTena
     Route::livewire('/bookings', 'tenant::pages.booking.view-booking')->name('bookings.index');
     Route::livewire('/bookings/create', 'tenant::pages.booking.create-booking')->name('bookings.create');
     Route::livewire('/bookings/{id}/edit', 'tenant::pages.booking.edit-booking')->name('bookings.edit');
+    // Booking show page
+    Route::get('/bookings/{booking}', function (Booking $booking) {
+        return view('tenant.pages.booking.show-booking', ['booking' => $booking]);
+    })->name('bookings.show');
 
     // Customers
     Route::livewire('/customers', 'tenant::pages.customer.view-customer')->name('customers.index');
@@ -104,7 +115,7 @@ Route::prefix('admin')->name('tenant.')->middleware([Authenticate::class, IsTena
     Route::livewire('/properties/create', 'tenant::pages.property.create-property')->name('properties.create');
     Route::livewire('/properties/{property}/edit', 'tenant::pages.property.edit-property')->name('properties.edit');
 
-    // Property Types
+    // Property Types (tenant only)
     Route::livewire('/property-types', 'tenant::pages.property-type.view-type')->name('property-types.index');
     Route::livewire('/property-types/create', 'tenant::pages.property-type.create-type')->name('property-types.create');
     Route::livewire('/property-types/{type}/edit', 'tenant::pages.property-type.edit-type')->name('property-types.edit');
@@ -120,7 +131,19 @@ Route::prefix('admin')->name('tenant.')->middleware([Authenticate::class, IsTena
     Route::livewire('/payments/{payment}/edit', 'tenant::pages.payment.edit-payment')->name('payments.edit');
     Route::livewire('/transactions', 'tenant::pages.transaction.view-transaction')->name('transactions.index');
 
-   Route::livewire('/roles', 'tenant::pages.role.view-role')->name('roles.index');
-Route::livewire('/roles/create', 'tenant::pages.role.create-role')->name('roles.create');
-Route::livewire('/roles/{index}/edit', 'tenant::pages.role.edit-role')->name('roles.edit');
+    // PayMongo Payment Routes
+    Route::get('/payments/success/{booking}', function (Booking $booking) {
+        return redirect()->route('tenant.bookings.show', $booking)
+            ->with('message', 'Payment completed! Processing may take a moment.');
+    })->name('payments.success');
+
+    Route::get('/payments/cancel/{booking}', function (Booking $booking) {
+        return redirect()->route('tenant.bookings.show', $booking)
+            ->with('error', 'Payment was cancelled.');
+    })->name('payments.cancel');
+
+    // Custom Roles (Tenant)
+    Route::livewire('/roles', 'tenant::pages.role.view-role')->name('roles.index');
+    Route::livewire('/roles/create', 'tenant::pages.role.create-role')->name('roles.create');
+    Route::livewire('/roles/{index}/edit', 'tenant::pages.role.edit-role')->name('roles.edit');
 });

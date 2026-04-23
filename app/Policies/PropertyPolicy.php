@@ -27,10 +27,17 @@ class PropertyPolicy
 
     public function delete(User $user, Property $property): bool
     {
-        // Don't allow deletion if there are active bookings
-        if ($property->bookings()->where('status', '!=', 'completed')->exists()) {
+      
+        $hasActiveBookings = $property->bookingItems()
+            ->whereHas('booking', function ($query) {
+                $query->whereNotIn('status', ['completed', 'cancelled']);
+            })
+            ->exists();
+
+        if ($hasActiveBookings) {
             return false;
         }
+
         return $user->tenant_id === $property->tenant_id;
     }
 }

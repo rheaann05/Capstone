@@ -7,10 +7,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "guzzlehttp/guzzle": "^7.10",
         "laravel/framework": "^13.0",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.2",
         "livewire/volt": "^1.10",
+        "luigel/laravel-paymongo": "^2.6",
         "spatie/laravel-permission": "^7.2"
     },
     "require-dev": {

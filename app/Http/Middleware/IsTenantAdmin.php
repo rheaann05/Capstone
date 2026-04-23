@@ -10,10 +10,9 @@ class IsTenantAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && $request->user()->hasAnyRole(['admin', 'super-admin'])) { 
+        if ($request->user() && $request->user()->hasAnyRole(['admin', 'super-admin'])) {
             return $next($request);
         }
-
         abort(403, 'Unauthorized access.');
     }
 }

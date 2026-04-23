@@ -6,6 +6,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use App\Models\User;
 use App\Models\Tenant;
@@ -24,7 +25,9 @@ class extends Component {
     #[Validate]
     public $email = '';
     
+    #[Validate]
     public $password = '';
+    
     public $password_confirmation = '';
     
     #[Validate('nullable|exists:tenants,id')]
@@ -60,6 +63,7 @@ class extends Component {
                 'email',
                 Rule::unique('users', 'email')->ignore($this->user->id),
             ],
+            'password' => 'sometimes|min:8|confirmed',
         ];
     }
 
@@ -105,39 +109,32 @@ class extends Component {
     {
         $this->validate();
 
-        // Validate password confirmation if a new password is provided
-        if (!empty($this->password) && $this->password !== $this->password_confirmation) {
-            $this->addError('password_confirmation', 'The password confirmation does not match.');
-            return;
-        }
-
         // Prevent super-admin from losing their own super-admin role
         if ($this->user->id === auth()->id() && $this->user->hasRole('super-admin') && $this->role !== 'super-admin') {
             $this->addError('role', 'You cannot remove your own Super Admin role.');
             return;
         }
 
-        $data = [
-            'name' => $this->name,
-            'email' => $this->email,
-            'tenant_id' => $this->isPlatformUser ? null : ($this->tenant_id ?: null),
-        ];
+        DB::transaction(function () {
+            $data = [
+                'name' => $this->name,
+                'email' => $this->email,
+                'tenant_id' => $this->isPlatformUser ? null : ($this->tenant_id ?: null),
+            ];
 
-        if (!empty($this->password)) {
-            $data['password'] = Hash::make($this->password);
-        }
+            if (!empty($this->password)) {
+                $data['password'] = Hash::make($this->password);
+            }
 
-        $this->user->update($data);
-        $this->user->syncRoles([$this->role]);
+            $this->user->update($data);
+            $this->user->syncRoles([$this->role]);
+        });
         
         session()->flash('message', "User '{$this->user->name}' updated successfully.");
         return $this->redirectRoute('superadmin.users.index', navigate: true);
     }
 };
 ?>
-
-<div>
-    {{-- Tom Select CDN --}}
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet" data-navigate-once>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js" data-navigate-once></script>
 

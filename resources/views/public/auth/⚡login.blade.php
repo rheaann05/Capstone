@@ -23,22 +23,28 @@ class extends Component {
     {
         $this->validate();
 
+        // Attempt authentication with credentials
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+            $user = Auth::user();
+
+            // Check if the account is active
+            if (!$user->is_active) {
+                Auth::logout();
+                $this->addError('email', 'Your account has been deactivated. Please contact support.');
+                return;
+            }
+
             session()->regenerate();
 
-            $user = auth()->user();
-
-            // 1. Super Admins go to the Platform Level Dashboard (superadmin namespace)
+            // Redirect based on role
             if ($user->hasRole('super-admin')) {
                 return $this->redirectRoute('superadmin.dashboard', navigate: true);
             }
 
-            // 2. Business Owners go to their Business Level (tenant namespace)
             if ($user->hasRole('admin')) {
                 return $this->redirectRoute('tenant.dashboard', navigate: true);
             }
 
-            // 3. Regular public users go to the home page
             return $this->redirectRoute('home', navigate: true);
         }
 
@@ -46,7 +52,6 @@ class extends Component {
     }
 };
 ?>
-
 <div class="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
         <div>

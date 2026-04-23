@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete(); // Ties it to the tenant/owner
             $table->foreignId('property_type_id')->constrained('property_types')->cascadeOnDelete();
-            $table->string('name'); // e.g., "Cottage 1", "Deluxe Room"
+            $table->string('name'); 
             $table->text('description')->nullable();
+            $table->integer('capacity')->default(1); 
             $table->decimal('price', 10, 2)->default(0.00);
-            $table->string('status')->default('available'); // available, occupied, maintenance
+            $table->string('status')->default('available'); 
             $table->boolean('is_active')->default(true);
-            
             $table->timestamps();
         });
     }

@@ -29,19 +29,19 @@ class extends Component {
     #[Validate('required|string|max:255')]
     public $address = '';
 
-    #[Validate('required|email|max:255|unique:tenants,email')]
+    #[Validate('required|email|max:255|unique:tenants,email|unique:users,email')]
     public $email = '';
 
     #[Validate('nullable|string|max:20|regex:/^[0-9\+\-\s\(\)]+$/')]
     public $contact_number = '';
 
-    #[Validate('nullable|numeric|min:-90|max:90')]
-    public $latitude = 10.6765;
+    #[Validate('required|numeric|min:-90|max:90')]
+    public $latitude = 10.900977766937142;
 
-    #[Validate('nullable|numeric|min:-180|max:180')]
-    public $longitude = 122.9509;
+    #[Validate('required|numeric|min:-180|max:180')]
+    public $longitude = 123.07055771888716;
 
-    #[Validate('required|string|max:255|regex:/^[a-zA-Z\s\-\.]+$/')]
+    #[Validate('required|string|max:255')]
     public $admin_name = '';
 
     #[Validate('required|min:8')]
@@ -53,10 +53,16 @@ class extends Component {
         return TypeOfTenant::all();
     }
 
-    // Auto‑trim string inputs for extra safety
+    public function messages()
+    {
+        return [
+            'email.unique' => 'This email is already registered. Please use a different email address.',
+        ];
+    }
+
     public function updated($property)
     {
-        if (in_array($property, ['name', 'address', 'contact_number', 'admin_name'])) {
+        if (in_array($property, ['name', 'address', 'contact_number', 'admin_name', 'email'])) {
             $this->$property = trim($this->$property);
         }
     }
@@ -128,7 +134,7 @@ class extends Component {
                             
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">URL Slug</label>
-                                <input type="text" wire:model="slug" class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-600 focus:ring-blue-500" placeholder="auto-generated-slug">
+                                <input type="text" wire:model="slug" readonly class="w-full rounded-lg border-slate-300 bg-slate-50 text-slate-600 focus:ring-blue-500" placeholder="auto-generated-slug">
                                 @error('slug') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                         </div>
@@ -158,17 +164,16 @@ class extends Component {
                             @error('address') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
-                        {{-- Latitude and Longitude as hidden inputs? No, they are bound via wire:model in the map component automatically --}}
-                        {{-- But we can keep them as hidden or display them if needed --}}
+                        {{-- Coordinates with auto-select on focus --}}
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Latitude</label>
-                                <input type="text" wire:model.live="latitude" class="w-full bg-slate-50 rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" readonly>
+                                <input type="text" wire:model.live="latitude" onfocus="this.select()" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
                                 @error('latitude') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">Longitude</label>
-                                <input type="text" wire:model.live="longitude" class="w-full bg-slate-50 rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" readonly>
+                                <input type="text" wire:model.live="longitude" onfocus="this.select()" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
                                 @error('longitude') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                         </div>

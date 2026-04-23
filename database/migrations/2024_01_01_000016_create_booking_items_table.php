@@ -17,7 +17,6 @@ return new class extends Migration
     $table->foreignId('booking_id')->constrained('bookings')->cascadeOnDelete();
     $table->foreignId('property_id')->constrained('properties')->cascadeOnDelete();
     $table->decimal('price', 10, 2);
-    $table->date('check_out')->nullable();
     $table->integer('quantity')->default(1);
     $table->decimal('subtotal', 10, 2);
     $table->timestamps();

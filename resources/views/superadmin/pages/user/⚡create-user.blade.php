@@ -6,6 +6,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Tenant;
 use Spatie\Permission\Models\Role;
@@ -21,7 +22,7 @@ class extends Component {
     #[Validate('required|email|unique:users,email')]
     public $email = '';
     
-    #[Validate('required|min:8')]
+    #[Validate('required|min:8|confirmed')]
     public $password = '';
     
     public $password_confirmation = '';
@@ -77,22 +78,22 @@ class extends Component {
     {
         $this->validate();
 
-        if ($this->password !== $this->password_confirmation) {
-            $this->addError('password_confirmation', 'The password confirmation does not match.');
-            return;
-        }
+        // Ensure empty string becomes null for database
+        $tenantId = $this->isPlatformUser ? null : ($this->tenant_id ?: null);
 
-        $user = User::create([
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'tenant_id' => $this->isPlatformUser ? null : ($this->tenant_id ?: null),
-            'is_active' => true,
-        ]);
+        DB::transaction(function () use ($tenantId) {
+            $user = User::create([
+                'name' => $this->name,
+                'email' => $this->email,
+                'password' => Hash::make($this->password),
+                'tenant_id' => $tenantId,
+                'is_active' => true,
+            ]);
 
-        $user->assignRole($this->role);
+            $user->assignRole($this->role);
+        });
         
-        session()->flash('message', "User '{$user->name}' created successfully.");
+        session()->flash('message', "User '{$this->name}' created successfully.");
         return $this->redirectRoute('superadmin.users.index', navigate: true);
     }
 };
@@ -134,7 +135,6 @@ class extends Component {
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
                     <input type="password" wire:model="password_confirmation" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="••••••••">
-                    @error('password_confirmation') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -216,7 +216,6 @@ class extends Component {
         return {
             ts: null,
             init() {
-                // Wait for Tom Select to be available
                 let checkInterval = setInterval(() => {
                     if (typeof TomSelect !== 'undefined') {
                         clearInterval(checkInterval);
@@ -244,14 +243,12 @@ class extends Component {
                     }
                 });
 
-                // Watch for changes from Livewire
                 @this.$watch('tenantSearch', (value) => {
                     if (!value && this.ts) {
                         this.ts.clear();
                     }
                 });
                 
-                // Watch for platform user toggle
                 @this.$watch('isPlatformUser', (value) => {
                     if (value && this.ts) {
                         this.ts.clear();

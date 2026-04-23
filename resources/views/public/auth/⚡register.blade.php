@@ -7,6 +7,7 @@ use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Spatie\Permission\Models\Role; // 👈 Add this import
 
 new 
 #[Layout('layouts.app')] 
@@ -33,12 +34,12 @@ class extends Component {
             'email' => $this->email,
             'password' => Hash::make($this->password),
             'is_active' => true,
-            // Public users don't belong to a specific business by default
             'tenant_id' => null, 
         ]);
 
-        // Optional: If you have a default public role, assign it here
-        // $user->assignRole('customer');
+        // Assign "tourist" role (create if not exists for safety)
+        $touristRole = Role::firstOrCreate(['name' => 'tourist']);
+        $user->assignRole($touristRole);
 
         Auth::login($user);
 
@@ -46,7 +47,6 @@ class extends Component {
     }
 };
 ?>
-
 <div class="min-h-screen flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm border border-slate-200">
         <div>

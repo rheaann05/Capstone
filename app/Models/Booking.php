@@ -25,13 +25,11 @@ class Booking extends Model
         'check_out' => 'date',
     ];
 
-   
     public function getCheckInAttribute($value): ?Carbon
     {
         return $value ? Carbon::parse($value) : null;
     }
 
-    
     public function getCheckOutAttribute($value): ?Carbon
     {
         return $value ? Carbon::parse($value) : null;
@@ -60,5 +58,15 @@ class Booking extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+    protected static function booted()
+    {
+        static::updated(function (Booking $booking) {
+            if (in_array($booking->status, ['completed', 'cancelled'])) {
+             
+                $propertyIds = $booking->items()->pluck('property_id')->unique();
+                Property::whereIn('id', $propertyIds)->update(['status' => 'available']);
+            }
+        });
     }
 }

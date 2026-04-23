@@ -10,14 +10,13 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create the Roles
+        // Create Roles
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
-        $tenantAdminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']); // Your normal tenant admin
+        $tenantAdminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $editorRole = Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
+        $touristRole = Role::firstOrCreate(['name' => 'tourist', 'guard_name' => 'web']); 
 
-        // 2. Give the Tenant Admin their specific permissions
-        $tenantAdminRole->givePermissionTo(Permission::all()); 
-        
-      
+        // Assign permissions to Tenant Admin
+        $tenantAdminRole->givePermissionTo(Permission::all());
     }
 }

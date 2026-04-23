@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\BookingItem;
 use App\Models\BookingService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 new 
@@ -40,35 +41,24 @@ class extends Component {
     public function mount(Booking $booking)
     {
         $this->booking = $booking;
-        
-        // Set customer_id as string to match select option values
-        $this->customer_id = $booking->customer_id ? (string) $booking->customer_id : '';
-        
-        // Safely handle dates - ensure they are Carbon instances before formatting
-        $this->check_in = $booking->check_in 
-            ? Carbon::parse($booking->check_in)->format('Y-m-d') 
-            : now()->format('Y-m-d');
-        $this->check_out = $booking->check_out 
-            ? Carbon::parse($booking->check_out)->format('Y-m-d') 
-            : now()->addDay()->format('Y-m-d');
-            
+        $this->customer_id = (string) $booking->customer_id;
+        $this->check_in = $booking->check_in ? Carbon::parse($booking->check_in)->format('Y-m-d') : now()->format('Y-m-d');
+        $this->check_out = $booking->check_out ? Carbon::parse($booking->check_out)->format('Y-m-d') : now()->addDay()->format('Y-m-d');
         $this->booking_reference = $booking->booking_reference;
         $this->status = $booking->status;
         
-        // Load existing property items with their details
         foreach ($booking->items as $item) {
             $this->selectedProperties[$item->property_id] = [
                 'quantity' => $item->quantity,
                 'price' => $item->price,
-                'id' => $item->id, // Keep track of the existing item ID for updates
+                'id' => $item->id,
             ];
         }
         
-        // Load existing service items with their details
         foreach ($booking->services as $service) {
             $this->selectedServices[$service->service_id] = [
                 'quantity' => $service->quantity,
-                'price' => $service->service->price ?? $service->price ?? 0,
+                'price' => $service->service->price ?? 0,
                 'id' => $service->id,
             ];
         }
@@ -89,7 +79,6 @@ class extends Component {
 
     public function removeProperty($propertyId)
     {
-        // If this was an existing item, delete it from the database immediately
         if (isset($this->selectedProperties[$propertyId]['id'])) {
             BookingItem::find($this->selectedProperties[$propertyId]['id'])->delete();
         }
@@ -154,26 +143,35 @@ class extends Component {
     
     public function getAvailablePropertiesProperty()
     {
-        $excludeIds = BookingItem::whereHas('booking', function ($q) {
-            $q->where('status', '!=', 'cancelled')
-              ->where('id', '!=', $this->booking->id)
-              ->where(function ($q) {
-                  $q->whereBetween('check_in', [$this->check_in, $this->check_out])
-                    ->orWhereBetween('check_out', [$this->check_in, $this->check_out])
-                    ->orWhere(function ($q) {
-                        $q->where('check_in', '<=', $this->check_in)
-                          ->where('check_out', '>=', $this->check_out);
-                    });
-              });
-        })->pluck('property_id')->toArray();
-        
-        // Don't exclude properties that are already selected in this booking
-        $excludeIds = array_diff($excludeIds, array_keys($this->selectedProperties));
-        
-        return Property::where('is_active', true)
-            ->whereNotIn('id', $excludeIds)
+        if (!$this->check_in || !$this->check_out) {
+            return collect();
+        }
+
+        $checkIn = $this->check_in;
+        $checkOut = $this->check_out;
+        $bookingId = $this->booking->id;
+
+        $properties = Property::where('is_active', true)
             ->orderBy('name')
             ->get();
+
+        $available = $properties->filter(function ($property) use ($checkIn, $checkOut, $bookingId) {
+            if (isset($this->selectedProperties[$property->id])) {
+                return true;
+            }
+
+            $hasConflict = BookingItem::where('property_id', $property->id)
+                ->whereHas('booking', function ($query) use ($checkIn, $checkOut, $bookingId) {
+                    $query->whereNotIn('status', ['cancelled', 'completed'])
+                        ->where('id', '!=', $bookingId)
+                        ->where('check_in', '<', $checkOut)
+                        ->where('check_out', '>', $checkIn);
+                })
+                ->exists();
+            return !$hasConflict;
+        });
+
+        return $available->values();
     }
 
     public function getAvailableServicesProperty()
@@ -190,69 +188,66 @@ class extends Component {
         
         $this->validate();
 
-        $this->booking->update([
-            'customer_id' => $this->customer_id,
-            'check_in' => $this->check_in,
-            'check_out' => $this->check_out,
-            'status' => $this->status,
-            'total_amount' => $this->totalAmount,
-        ]);
+        DB::transaction(function () {
+            $this->booking->update([
+                'customer_id' => $this->customer_id,
+                'check_in' => $this->check_in,
+                'check_out' => $this->check_out,
+                'status' => $this->status,
+                'total_amount' => $this->totalAmount,
+            ]);
 
-        $nights = Carbon::parse($this->check_in)->diffInDays($this->check_out);
-        $nights = max(1, $nights);
+            $nights = Carbon::parse($this->check_in)->diffInDays($this->check_out);
+            $nights = max(1, $nights);
 
-        // Update or create property items
-        $existingItemIds = $this->booking->items->pluck('id')->toArray();
-        foreach ($this->selectedProperties as $propertyId => $item) {
-            $subtotal = $item['price'] * $item['quantity'] * $nights;
-            
-            if (isset($item['id'])) {
-                // Update existing item
-                BookingItem::where('id', $item['id'])->update([
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $subtotal,
-                ]);
-                $existingItemIds = array_diff($existingItemIds, [$item['id']]);
-            } else {
-                // Create new item
-                BookingItem::create([
-                    'tenant_id' => Auth::user()->tenant_id,
-                    'booking_id' => $this->booking->id,
-                    'property_id' => $propertyId,
-                    'price' => $item['price'],
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $subtotal,
-                ]);
+            // Sync property items
+            $existingItemIds = $this->booking->items->pluck('id')->toArray();
+            foreach ($this->selectedProperties as $propertyId => $item) {
+                $subtotal = $item['price'] * $item['quantity'] * $nights;
+                if (isset($item['id'])) {
+                    BookingItem::where('id', $item['id'])->update([
+                        'quantity' => $item['quantity'],
+                        'subtotal' => $subtotal,
+                    ]);
+                    $existingItemIds = array_diff($existingItemIds, [$item['id']]);
+                } else {
+                    BookingItem::create([
+                        'tenant_id' => Auth::user()->tenant_id,
+                        'booking_id' => $this->booking->id,
+                        'property_id' => $propertyId,
+                        'price' => $item['price'],
+                        'quantity' => $item['quantity'],
+                        'subtotal' => $subtotal,
+                    ]);
+                }
             }
-        }
-        // Delete any items that were removed
-        BookingItem::whereIn('id', $existingItemIds)->delete();
+            BookingItem::whereIn('id', $existingItemIds)->delete();
 
-        // Update or create service items
-        $existingServiceIds = $this->booking->services->pluck('id')->toArray();
-        foreach ($this->selectedServices as $serviceId => $item) {
-            $subtotal = $item['price'] * $item['quantity'];
-            
-            if (isset($item['id'])) {
-                BookingService::where('id', $item['id'])->update([
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $subtotal,
-                ]);
-                $existingServiceIds = array_diff($existingServiceIds, [$item['id']]);
-            } else {
-                BookingService::create([
-                    'tenant_id' => Auth::user()->tenant_id,
-                    'booking_id' => $this->booking->id,
-                    'service_id' => $serviceId,
-                    'quantity' => $item['quantity'],
-                    'subtotal' => $subtotal,
-                ]);
+            // Sync service items
+            $existingServiceIds = $this->booking->services->pluck('id')->toArray();
+            foreach ($this->selectedServices as $serviceId => $item) {
+                $subtotal = $item['price'] * $item['quantity'];
+                if (isset($item['id'])) {
+                    BookingService::where('id', $item['id'])->update([
+                        'quantity' => $item['quantity'],
+                        'subtotal' => $subtotal,
+                    ]);
+                    $existingServiceIds = array_diff($existingServiceIds, [$item['id']]);
+                } else {
+                    BookingService::create([
+                        'tenant_id' => Auth::user()->tenant_id,
+                        'booking_id' => $this->booking->id,
+                        'service_id' => $serviceId,
+                        'quantity' => $item['quantity'],
+                        'subtotal' => $subtotal,
+                    ]);
+                }
             }
-        }
-        BookingService::whereIn('id', $existingServiceIds)->delete();
+            BookingService::whereIn('id', $existingServiceIds)->delete();
+        });
 
         session()->flash('message', 'Booking updated successfully.');
-        return $this->redirectRoute('tenant.bookings.index', navigate: true);
+        return $this->redirectRoute('tenant.bookings.show', ['booking' => $this->booking->id], navigate: true);
     }
 };
 ?>
