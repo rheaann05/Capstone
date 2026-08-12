@@ -1,16 +1,10 @@
 <?php
-
 use Livewire\Component;
-
-new class extends Component
-{
-    //
-};
 ?>
 
 <div>
         <div class="relative z-10">
-    {{-- ========== HERO ========== --}}
+    
     <section class="relative w-full h-[70vh] flex items-center justify-center overflow-hidden">
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070"
@@ -29,7 +23,7 @@ new class extends Component
     </section>
 
 
-    {{-- ========== ABOUT SECTION ========== --}}
+    
     <div class="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-16 items-start">
         <div class="space-y-8">
             <div class="inline-flex items-center gap-2 text-brand-600 dark:text-brand-400 font-bold text-sm">
@@ -80,7 +74,7 @@ new class extends Component
         </div>
 
 
-        {{-- Image grid --}}
+        
         <div class="relative grid grid-cols-2 gap-4">
             <div class="space-y-4 pt-12">
                 <img src="https://images.pexels.com/photos/37579302/pexels-photo-37579302.jpeg" class="rounded-2xl shadow-lg border-4 border-white dark:border-white/10" alt="Forest Detail">
@@ -96,12 +90,12 @@ new class extends Component
     </div>
 
 
-    {{-- ========== HIGHLIGHTS ========== --}}
+    
     <div class="bg-gray-50 dark:bg-white/5 py-24 text-gray-900 dark:text-white font-sans">
         <div class="max-w-7xl mx-auto px-6">
 
 
-            {{-- Gawahon Eco-Park --}}
+            
             <div class="flex flex-col md:flex-row gap-16 items-center mb-32">
                 <div class="w-full md:w-3/5 relative">
         <div class="absolute -top-4 -left-4 w-24 h-24 bg-brand-200/50 dark:bg-brand-500/10 -z-10 rounded-full blur-2xl"></div>
@@ -121,7 +115,7 @@ new class extends Component
             </div>
 
 
-            {{-- Angry Christ Mural --}}
+            
             <div class="flex flex-col md:flex-row-reverse gap-16 items-center mb-32">
                 <div class="w-full md:w-3/5 relative">
                     <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-200/50 dark:bg-purple-500/10 -z-10 rounded-full blur-3xl"></div>
@@ -140,7 +134,7 @@ new class extends Component
             </div>
 
 
-            {{-- VMC --}}
+            
             <div class="flex flex-col md:flex-row gap-16 items-center">
                 <div class="w-full md:w-3/5">
                  <img src="https://images.pexels.com/photos/37580044/pexels-photo-37580044.jpeg"
@@ -162,7 +156,7 @@ new class extends Component
     </div>
 
 
-    {{-- ========== CTA ========== --}}
+    
     <div class="py-24 px-6">
         <div class="max-w-4xl mx-auto rounded-[3rem] bg-gradient-to-br from-brand-900 to-[#062c1e] p-12 text-center shadow-2xl relative overflow-hidden group">
             <div class="absolute -top-24 -right-24 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl"></div>
@@ -174,10 +168,10 @@ new class extends Component
                     Experience the natural beauty and warm hospitality of our community.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="{{ route('explore.map') }}" wire:navigate class="px-8 py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-brand-500/20 hover:scale-105">
+                    <a href="<?php echo e(route('explore.map')); ?>" wire:navigate class="px-8 py-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-brand-500/20 hover:scale-105">
                         Explore Map
                     </a>
-                    <a href="{{ route('about') }}" wire:navigate class="px-8 py-4 glass text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
+                    <a href="<?php echo e(route('about')); ?>" wire:navigate class="px-8 py-4 glass text-white font-bold rounded-2xl hover:bg-white/10 transition-all">
                         Learn More
                     </a>
                 </div>
@@ -392,4 +386,4 @@ new class extends Component
 
 
 
-</div>
+</div><?php /**PATH C:\laragon\www\Capstone\storage\framework/views/livewire/views/771c1ec3.blade.php ENDPATH**/ ?>

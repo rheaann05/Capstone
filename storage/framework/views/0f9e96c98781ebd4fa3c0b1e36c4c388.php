@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 <?php $__env->stopPush(); ?>
 
+
 <div
     class="relative z-10 min-h-screen"
     x-data="{
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
         lightboxSrc: null,
         lightboxIndex: 0,
         galleryImages: <?php echo e(Js::from(collect($galleryImages)->map(fn($p) => Storage::url($p))->values())); ?>,
+
 
         openGallery() {
             this.galleryOpen = true;
@@ -47,6 +49,7 @@ use Illuminate\Support\Facades\Storage;
     @keydown.arrow-right.window="lightboxSrc && nextImage()"
 >
 
+
     
     <div x-show="galleryOpen" x-cloak
          class="gallery-modal-overlay"
@@ -56,6 +59,7 @@ use Illuminate\Support\Facades\Storage;
          x-transition:leave="transition-opacity duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
+
 
         
         <div class="flex-none flex items-center justify-between px-8 py-5 border-b border-white/8">
@@ -83,6 +87,7 @@ use Illuminate\Support\Facades\Storage;
                 </button>
             </div>
         </div>
+
 
         
         <div class="flex-1 overflow-y-auto p-6 md:p-8">
@@ -112,6 +117,7 @@ use Illuminate\Support\Facades\Storage;
             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
 
+
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($gallerySubtitle): ?>
             <div class="flex-none border-t border-white/8 px-8 py-3 text-xs text-white/30 italic">
@@ -120,6 +126,7 @@ use Illuminate\Support\Facades\Storage;
             </div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
+
 
     
     <div x-show="lightboxSrc" x-cloak class="lb-inner" @click.self="lightboxSrc = null">
@@ -140,8 +147,10 @@ use Illuminate\Support\Facades\Storage;
         </button>
     </div>
 
+
     
     <section class="relative min-h-[72vh] flex items-end overflow-hidden pb-16 md:pb-20">
+
 
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($coverPhoto): ?>
@@ -152,15 +161,19 @@ use Illuminate\Support\Facades\Storage;
             <div class="absolute inset-0 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950"></div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
+
         
         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+
 
         
         <div class="absolute inset-0 opacity-[0.035]"
              style="background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\"); background-size: 180px;"></div>
 
+
         <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-16 w-full">
+
 
             
             <div class="anim-hero-meta mb-8">
@@ -172,7 +185,9 @@ use Illuminate\Support\Facades\Storage;
                 </a>
             </div>
 
+
             <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
+
 
                 
                 <div class="max-w-2xl">
@@ -187,6 +202,7 @@ use Illuminate\Support\Facades\Storage;
                     <p class="anim-hero-meta mt-4 text-sm text-white/45 max-w-sm leading-relaxed">
                         Discover our spaces and services — crafted for comfort, built for memory.
                     </p>
+
 
                     
                     <div class="anim-hero-stats mt-8 flex items-center gap-6">
@@ -209,9 +225,11 @@ use Illuminate\Support\Facades\Storage;
                     </div>
                 </div>
 
+
                 
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($galleryImages)): ?>
                     <div class="anim-hero-ctas flex flex-col items-start lg:items-end gap-5">
+
 
                         
                         <div class="gallery-strip w-full lg:w-80 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
@@ -224,6 +242,7 @@ use Illuminate\Support\Facades\Storage;
                                 </div>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                         </div>
+
 
                         
                         <button @click="openGallery()"
@@ -238,9 +257,11 @@ use Illuminate\Support\Facades\Storage;
                     </div>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
+
             </div>
         </div>
     </section>
+
 
     
     <div class="sticky top-16 z-20 py-3 bg-black/60 backdrop-blur-xl border-b border-white/6">
@@ -258,6 +279,7 @@ use Illuminate\Support\Facades\Storage;
                 </button>
             </div>
 
+
             
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($galleryImages)): ?>
                 <button @click="openGallery()"
@@ -269,8 +291,10 @@ use Illuminate\Support\Facades\Storage;
         </div>
     </div>
 
+
     
     <div class="max-w-7xl mx-auto px-6 md:px-16 py-12 md:py-16">
+
 
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeTab === 'accommodations'): ?>
@@ -285,10 +309,12 @@ use Illuminate\Support\Facades\Storage;
                 <p class="mt-2 text-sm text-white/40 max-w-md">All rooms shown are immediately bookable for your stay.</p>
             </div>
 
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $this->properties; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $property): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                     <div class="prop-card flex flex-col" <?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::$currentLoop['key'] = 'prop-'.e($property->id).''; ?>wire:key="prop-<?php echo e($property->id); ?>"
                          style="animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) <?php echo e($index * 80); ?>ms both">
+
 
                         
                         <div class="prop-card-image">
@@ -300,6 +326,7 @@ use Illuminate\Support\Facades\Storage;
                                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 </div>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
 
                             
                             <div class="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -315,6 +342,7 @@ use Illuminate\Support\Facades\Storage;
                                 Available
                             </span>
 
+
                             
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($property->images->count() > 1): ?>
                                 <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-[10px] text-white/60 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -324,6 +352,7 @@ use Illuminate\Support\Facades\Storage;
                                 </span>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
+
 
                         
                         <div class="p-5 flex flex-col flex-1">
@@ -339,6 +368,7 @@ use Illuminate\Support\Facades\Storage;
                             <?php else: ?>
                                 <div class="flex-1"></div>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
 
                             
                             <div class="flex items-center justify-between pt-4 mt-auto"
@@ -375,6 +405,7 @@ use Illuminate\Support\Facades\Storage;
             </div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
+
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeTab === 'services'): ?>
             <div class="anim-section mb-10">
@@ -388,23 +419,28 @@ use Illuminate\Support\Facades\Storage;
                 <p class="mt-2 text-sm text-white/40 max-w-md">Extras available to make your stay even more special.</p>
             </div>
 
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $this->services; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                     <div class="svc-card flex flex-col" <?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::$currentLoop['key'] = 'svc-'.e($service->id).''; ?>wire:key="svc-<?php echo e($service->id); ?>"
                          style="animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) <?php echo e($index * 70); ?>ms both">
+
 
                         
                         <div class="w-10 h-10 rounded-xl bg-brand-500/15 border border-brand-400/20 flex items-center justify-center text-brand-400 mb-4 flex-none">
                             <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                         </div>
 
+
                         <h3 class="font-display text-lg font-semibold text-white mb-2 leading-snug"><?php echo e($service->name); ?></h3>
+
 
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($service->description): ?>
                             <p class="text-sm text-white/50 flex-1 mb-5 leading-relaxed"><?php echo e($service->description); ?></p>
                         <?php else: ?>
                             <div class="flex-1 mb-5"></div>
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
 
                         <div class="flex items-center justify-between pt-4 mt-auto"
                              style="border-top: 1px solid rgba(255,255,255,0.07)">
@@ -435,7 +471,9 @@ use Illuminate\Support\Facades\Storage;
             </div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
+
     </div>
+
 
     
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($galleryImages)): ?>
@@ -461,5 +499,6 @@ use Illuminate\Support\Facades\Storage;
             </button>
         </section>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
 
 </div><?php /**PATH C:\laragon\www\Capstone\storage\framework/views/livewire/views/ed8c353c.blade.php ENDPATH**/ ?>

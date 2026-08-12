@@ -10,66 +10,71 @@ use Illuminate\Support\Facades\Storage;
 
 
 <div>
-    <div class="relative z-10">
-        
-        <section class="relative min-h-screen w-full overflow-hidden bg-[#071412] dark:bg-[#071412] text-white">
-            <div class="absolute inset-0 z-0">
-                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=1600"
-                     alt="Victorias City Forest"
-                     class="w-full h-full object-cover scale-110 opacity-40 dark:opacity-30">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#071412] via-[#071412]/70 to-transparent"></div>
-                <div class="absolute inset-0 bg-gradient-to-t from-[#071412] via-[#071412]/50 to-transparent"></div>
-            </div>
+   <div class="relative z-10">
+    
+    <section class="relative min-h-screen w-full overflow-hidden bg-[#071412] dark:bg-[#071412] text-white flex items-center">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.pexels.com/photos/37579265/pexels-photo-37579265.jpeg"
+                 alt="Victorias City Forest"
+                 class="w-full h-full object-cover scale-110 opacity-40 dark:opacity-30">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#071412] via-[#071412]/70 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#071412] via-[#071412]/50 to-transparent"></div>
+        </div>
 
-            <div class="relative z-10 flex flex-col lg:flex-row items-center w-full min-h-screen">
-                <div class="flex flex-col justify-center px-6 py-20 sm:p-12 lg:p-24 lg:w-3/5 w-full">
-                    <div class="space-y-4 mb-8">
-                        <span class="block text-brand-400 font-semibold tracking-[0.4em] uppercase text-xs sm:text-sm">Welcome to the North</span>
-                        <h1 class="font-display text-7xl md:text-8xl lg:text-9xl xl:text-[11rem] leading-[0.8] text-white tracking-tighter drop-shadow-lg">
-                            <span class="italic font-light">Victorias</span> <br>
-                            <span class="ml-4 md:ml-12">City</span>
-                        </h1>
-                    </div>
-                    <div class="max-w-lg">
-                        <p class="text-lg sm:text-xl text-white/70 leading-relaxed mb-10 font-light">
-                            Escape into a world where the air is scented with sugar cane and the mountains hum with hidden waterfalls. A breathtaking sanctuary in Negros Occidental.
-                        </p>
-                        <div class="relative inline-block group">
-                            <div class="absolute -inset-1 bg-brand-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <a href="<?php echo e(route('explore.map')); ?>" wire:navigate
-                               class="relative flex items-center gap-6 py-5 px-10 rounded-full bg-brand-600 hover:bg-brand-500 text-white font-bold tracking-widest uppercase transition-all duration-300 shadow-lg shadow-brand-500/20 border border-brand-400/20">
-                                Explore the Wild
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0-4 4m4-4H3" /></svg>
-                            </a>
-                        </div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row items-center justify-center w-full max-w-screen-2xl mx-auto min-h-screen">
+           
+            <div class="flex flex-col justify-center items-center lg:items-start text-center lg:text-left px-6 py-20 sm:p-12 lg:p-24 lg:w-3/5 w-full">
+                <div class="space-y-4 mb-8">
+                    <span class="block text-brand-400 font-semibold tracking-[0.4em] uppercase text-xs sm:text-sm">Welcome to the North</span>
+                    <h1 class="font-display text-6xl md:text-8xl lg:text-9xl xl:text-[11rem] leading-[0.8] text-white tracking-tighter drop-shadow-lg">
+                        <span class="italic font-light">Victorias</span> <br>
+                        <span class="lg:ml-12">City</span>
+                    </h1>
+                </div>
+                <div class="max-w-lg">
+                    <p class="text-lg sm:text-xl text-white/70 leading-relaxed mb-10 font-light">
+                        Escape into a world where the air is scented with sugar cane and the mountains hum with hidden waterfalls. A breathtaking sanctuary in Negros Occidental.
+                    </p>
+                    <div class="relative inline-block group">
+                        <div class="absolute -inset-1 bg-brand-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <a href="<?php echo e(route('explore.map')); ?>" wire:navigate
+                           class="relative flex items-center gap-6 py-5 px-10 rounded-full bg-brand-600 hover:bg-brand-500 text-white font-bold tracking-widest uppercase transition-all duration-300 shadow-lg shadow-brand-500/20 border border-brand-400/20">
+                            Explore the City
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0-4 4m4-4H3" /></svg>
+                        </a>
                     </div>
                 </div>
+            </div>
+
+
 
                 <div class="flex flex-row items-center justify-center gap-4 sm:gap-6 px-6 pb-24 lg:pb-0 lg:w-2/5 w-full">
                     <div class="flex flex-col items-center gap-4 mt-12 animate-float">
                         <div class="group relative rounded-2xl overflow-hidden shadow-2xl w-24 sm:w-36 lg:w-40 aspect-[3/4] border border-white/10">
-                            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-700" />
+                            <img src="https://images.pexels.com/photos/37579302/pexels-photo-37579302.jpeg" class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-700" />
                         </div>
-                        <span class="text-brand-400/60 text-[9px] tracking-widest uppercase">Nature</span>
+                        <span class="text-brand-400/60 text-[9px] tracking-widest uppercase">Victorias City </span>
                     </div>
                     <div class="flex flex-col items-center gap-4 z-20">
                         <div class="group relative rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] w-36 sm:w-56 lg:w-64 aspect-[3/5] border border-white/20">
-                            <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                            <img src="https://images.pexels.com/photos/37605273/pexels-photo-37605273.jpeg" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
-                                <p class="text-white text-xs font-bold tracking-widest uppercase">Gawahon Falls</p>
+                                <p class="text-white text-xs font-bold tracking-widest uppercase">Kadalag-an Festival</p>
                             </div>
                         </div>
                         <span class="text-white text-xs tracking-[0.4em] uppercase font-bold drop-shadow-lg">The Sanctuary</span>
                     </div>
                     <div class="flex flex-col items-center gap-4 mt-12 animate-float" style="animation-delay: 2s;">
                         <div class="group relative rounded-2xl overflow-hidden shadow-2xl w-24 sm:w-36 lg:w-40 aspect-[3/4] border border-white/10">
-                            <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-700" />
+                            <img src="https://images.pexels.com/photos/37579449/pexels-photo-37579449.jpeg" class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-700" />
                         </div>
                         <span class="text-brand-400/60 text-[9px] tracking-widest uppercase">Culture</span>
                     </div>
                 </div>
             </div>
         </section>
+
 
         
         <div class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -107,6 +112,7 @@ use Illuminate\Support\Facades\Storage;
                     </div>
                 </div>
 
+
                 
                 <div data-hs-carousel='{"loadingClasses": "opacity-0", "isAutoPlay": true}' class="relative group rounded-3xl overflow-hidden shadow-2xl">
                     <div class="hs-carousel relative overflow-hidden w-full h-[500px] md:h-[600px] bg-gray-100 dark:bg-white/5">
@@ -135,7 +141,10 @@ use Illuminate\Support\Facades\Storage;
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
-        </div>
+        </div> 
+
+            
+
 
         
         <section class="py-20 bg-gray-50 dark:bg-white/5">
@@ -145,6 +154,7 @@ use Illuminate\Support\Facades\Storage;
                     <div class="w-24 h-1 bg-brand-500 mx-auto rounded-full mb-6"></div>
                     <p class="text-gray-600 dark:text-white/50 text-lg max-w-xl mx-auto">A curated journey through the heart of Victorias City. Explore, breathe, and belong.</p>
                 </div>
+
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $this->tenants; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tenant): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
@@ -170,8 +180,10 @@ use Illuminate\Support\Facades\Storage;
             </div>
         </section>
 
+
         
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 
         <style>
             .leaflet-container { background: #071412 !important; border-radius: 1rem; }
@@ -198,6 +210,7 @@ use Illuminate\Support\Facades\Storage;
             .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; }
         </style>
 
+
         <section class="py-20 bg-gray-900 dark:bg-[#071412]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid lg:grid-cols-5 gap-10 items-start">
@@ -206,6 +219,7 @@ use Illuminate\Support\Facades\Storage;
                             <span class="inline-block w-5 h-px bg-brand-400"></span> Explore the Region
                         </p>
                         <h3 class="font-display text-3xl font-bold text-white mb-5">Interactive Map</h3>
+
 
                         <div class="bg-transparent rounded-xl border border-white/10 shadow-2xl p-2 relative z-10"
                              x-data="mapComponent"
@@ -239,7 +253,140 @@ use Illuminate\Support\Facades\Storage;
                     </div>
                 </div>
             </div>
-        </section>
+        </section> 
+
+        <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl glass-card flex flex-col lg:flex-row overflow-hidden !rounded-3xl !p-0">
+
+        
+        <div class="hidden lg:block relative flex-1 bg-black/40 overflow-hidden border-r border-white/10">
+            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 480 620" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+                <rect x="28"  y="22"  width="98"  height="62" rx="6" fill="rgba(34,197,94,0.15)" opacity=".8"/>
+                <rect x="142" y="22"  width="78"  height="62" rx="6" fill="rgba(34,197,94,0.15)" opacity=".8"/>
+                <rect x="236" y="22"  width="108" height="62" rx="6" fill="rgba(34,197,94,0.15)" opacity=".8"/>
+                <rect x="360" y="22"  width="96"  height="62" rx="6" fill="rgba(34,197,94,0.15)" opacity=".8"/>
+                <ellipse cx="200" cy="102" rx="58" ry="24" fill="rgba(37, 99, 235, 0.2)" opacity=".6"/>
+                <rect x="0"   y="98"  width="480" height="14" fill="rgba(255,255,255,0.05)"/>
+                <rect x="124" y="0"   width="10"  height="620" fill="rgba(255,255,255,0.05)"/>
+                <rect x="264" y="0"   width="10"  height="620" fill="rgba(255,255,255,0.05)"/>
+                <rect x="0"   y="254" width="480" height="10"  fill="rgba(255,255,255,0.05)"/>
+                <rect x="0"   y="394" width="480" height="10"  fill="rgba(255,255,255,0.05)"/>
+                <line x1="200" y1="0" x2="200" y2="110" stroke="rgba(34,197,94,0.4)" stroke-width="2.5"/>
+            </svg>
+
+            <div class="absolute top-4 right-4 size-9 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-xs font-bold text-brand-400 z-10">N</div>
+
+            <div class="absolute z-10 flex items-center gap-1.5 bg-white/10 backdrop-blur border border-white/10 rounded-lg px-2.5 py-1.5 shadow-md text-xs font-semibold text-white/80" style="top:170px; left:86px;">
+                <span class="inline-block size-2 rounded-full bg-pink-500 shrink-0"></span>
+                HQ
+            </div>
+
+            <div class="absolute z-10 flex flex-col items-center" style="top:128px; left:290px;">
+                <span class="size-3.5 rounded-full bg-brand-400 border-2 border-white/30 shadow block"></span>
+                <span class="w-px h-3 bg-brand-400 block"></span>
+            </div>
+
+            <div class="absolute z-10 flex flex-col items-center" style="top:210px; left:170px;">
+                <span class="size-7 rounded-full border-[3px] border-brand-400/20 flex items-center justify-center">
+                    <span class="size-3.5 rounded-full bg-brand-400 border-2 border-white/30 shadow block"></span>
+                </span>
+                <span class="w-px h-3 bg-brand-400 block"></span>
+            </div>
+
+            <div class="absolute z-10 flex flex-col items-center" style="top:316px; left:326px;">
+                <span class="size-3.5 rounded-full bg-brand-400 border-2 border-white/30 shadow block"></span>
+                <span class="w-px h-3 bg-brand-400 block"></span>
+            </div>
+
+            <div class="absolute z-10 flex flex-col items-center" style="top:348px; left:70px;">
+                <span class="size-3.5 rounded-full bg-brand-400 border-2 border-white/30 shadow block"></span>
+                <span class="w-px h-3 bg-brand-400 block"></span>
+            </div>
+
+            <div class="absolute bottom-5 right-5 z-10 inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-white/10 backdrop-blur text-white/80 border border-white/10">3 locations</div>
+
+            <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 size-9 rounded-full bg-white/10 backdrop-blur flex items-center justify-center border border-white/10">
+                <svg class="size-4 text-brand-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/></svg>
+            </div>
+        </div>
+
+        
+        <div class="w-full lg:max-w-md p-8 sm:p-10 relative bg-black/30 backdrop-blur-sm">
+            <div class="absolute top-4 right-4">
+                <button type="button" class="size-8 inline-flex items-center justify-center gap-x-2 rounded-full text-white/40 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256"><circle cx="128" cy="60" r="16"/><circle cx="128" cy="128" r="16"/><circle cx="128" cy="196" r="16"/></svg>
+                </button>
+            </div>
+
+            
+            <div class="flex items-center gap-x-3 mb-7">
+                <div class="size-10 rounded-xl bg-brand-600 inline-flex items-center justify-center shrink-0">
+                    <svg class="size-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                </div>
+                <span class="text-base font-semibold text-white"><?php echo e(config('app.name', 'Capstone')); ?></span>
+            </div>
+
+            
+            <h1 class="text-2xl font-bold text-white">Sign In</h1>
+            <p class="mt-1 text-sm text-white/60">
+                New here?
+                <a href="<?php echo e(route('register')); ?>" class="font-medium text-brand-400 decoration-2 hover:underline focus:outline-none focus:underline">Create an account</a>
+            </p>
+            <p class="mt-1 text-sm text-white/60">
+                Own a tourist spot?
+                <a href="<?php echo e(route('register_business')); ?>" wire:navigate class="font-medium text-brand-400 decoration-2 hover:underline focus:outline-none focus:underline">Register your business</a>
+            </p>
+
+            
+            <form wire:submit="login" class="space-y-4 mt-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium mb-2 text-white/70">Email Address</label>
+                    <input type="email" id="email" wire:model="email" placeholder="example@email.com"
+                           class="py-3 px-4 block w-full bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="mt-2 text-xs text-red-400"><?php echo e($message); ?></p> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium mb-2 text-white/70">Password</label>
+                    <input type="password" id="password" wire:model="password" placeholder="Enter your password"
+                           class="py-3 px-4 block w-full bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="mt-2 text-xs text-red-400"><?php echo e($message); ?></p> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+
+                <div class="flex items-center gap-x-3">
+                    <input type="checkbox" id="remember" wire:model="remember"
+                           class="shrink-0 mt-0.5 border-white/20 rounded text-brand-600 focus:ring-brand-500 bg-white/5 dark:checked:bg-brand-600 dark:checked:border-brand-600">
+                    <label for="remember" class="text-sm text-white/60">Remember me</label>
+                </div>
+
+                <button type="submit" wire:loading.attr="disabled"
+                        class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-brand-600 text-white hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-black/30 disabled:opacity-50 disabled:pointer-events-none transition-colors shadow-lg shadow-brand-500/20">
+                    <span wire:loading.remove>Sign In</span>
+                    <span wire:loading class="inline-flex items-center gap-x-2">
+                        <svg class="animate-spin size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                        Signing in...
+                    </span>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
 
         
         <section class="relative py-24 overflow-hidden bg-gray-50 dark:bg-white/5">
@@ -255,6 +402,7 @@ use Illuminate\Support\Facades\Storage;
             </div>
         </section>
     </div>
+
 
     
     <?php $__env->startPush('scripts'); ?>
@@ -272,6 +420,7 @@ use Illuminate\Support\Facades\Storage;
             } catch (e) { console.error(e); }
         }
 
+
         // Focus location helper
         window.focusLocation = function(index) {
             if (!window.mapInstance || !window.mapMarkers || !window.mapMarkers[index]) return;
@@ -280,12 +429,13 @@ use Illuminate\Support\Facades\Storage;
             setTimeout(() => window.mapMarkers[index].openPopup(), 1200);
         };
 
+
         // Map Alpine component
         document.addEventListener('alpine:init', () => {
             Alpine.data('mapComponent', () => ({
                 map: null,
                 markers: [],
-                
+               
                 init() {
                     const ready = () => {
                         if (typeof L !== 'undefined') {
@@ -297,6 +447,7 @@ use Illuminate\Support\Facades\Storage;
                     ready();
                 },
 
+
                 initMap() {
                     delete L.Icon.Default.prototype._getIconUrl;
                     L.Icon.Default.mergeOptions({
@@ -305,7 +456,9 @@ use Illuminate\Support\Facades\Storage;
                         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
                     });
 
+
                     const locations = <?php echo json_encode($this->mapLocations(), 15, 512) ?>;
+
 
                     if (!locations || locations.length === 0) {
                         this.$refs.mapContainer.innerHTML =
@@ -313,9 +466,11 @@ use Illuminate\Support\Facades\Storage;
                         return;
                     }
 
+
                     const centerLat = locations[0].lat;
                     const centerLng = locations[0].lng;
                     const zoom = locations.length === 1 ? 12 : 10;
+
 
                     this.map = L.map(this.$refs.mapContainer, {
                         center: [centerLat, centerLng],
@@ -323,10 +478,12 @@ use Illuminate\Support\Facades\Storage;
                         scrollWheelZoom: true,
                     });
 
+
                     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                         maxZoom: 19,
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CARTO',
                     }).addTo(this.map);
+
 
                     this.markers = [];
                     locations.forEach((loc, idx) => {
@@ -343,18 +500,22 @@ use Illuminate\Support\Facades\Storage;
                         this.markers.push(marker);
                     });
 
+
                     window.mapMarkers = this.markers;
                     window.mapInstance = this.map;
+
 
                     if (locations.length > 1) {
                         const bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
                         this.map.fitBounds(bounds, { padding: [50, 50] });
                     }
 
+
                     setTimeout(() => this.map.invalidateSize(), 200);
                 }
             }));
         });
+
 
         document.addEventListener('DOMContentLoaded', () => setTimeout(initCarousel, 200));
         document.addEventListener('livewire:navigated', () => setTimeout(initCarousel, 200));

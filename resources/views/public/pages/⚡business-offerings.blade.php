@@ -1,5 +1,6 @@
 <?php
 
+
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -7,6 +8,7 @@ use Livewire\Attributes\Computed;
 use App\Models\Tenant;
 use App\Scopes\TenantScope;
 use Illuminate\Support\Facades\Storage;
+
 
 new
 #[Layout('layouts.app')]
@@ -17,14 +19,17 @@ class extends Component
     public string $activeTab = 'accommodations';
     public ?string $coverPhoto = null;
 
+
     // ── Gallery fields ──
     public array  $galleryImages   = [];
     public string $galleryTitle    = '';
     public string $gallerySubtitle = '';
 
+
     public function mount($slug)
     {
         $this->tenant = Tenant::where('slug', $slug)->firstOrFail();
+
 
         $settings = $this->tenant->settings()
             ->withoutGlobalScope(TenantScope::class)
@@ -32,11 +37,13 @@ class extends Component
             ->get()
             ->pluck('value', 'key');
 
+
         $this->coverPhoto      = $settings['spot_cover']       ?? null;
         $this->galleryImages   = $settings['business_gallery'] ?? [];
         $this->galleryTitle    = $settings['gallery_title']    ?? '';
         $this->gallerySubtitle = $settings['gallery_subtitle'] ?? '';
     }
+
 
     #[Computed]
     public function properties()
@@ -53,6 +60,7 @@ class extends Component
             ->get();
     }
 
+
     #[Computed]
     public function services()
     {
@@ -63,6 +71,7 @@ class extends Component
             ->get();
     }
 
+
     public function getGalleryTitleHtml(): string
     {
         if (empty($this->galleryTitle)) return '';
@@ -70,6 +79,7 @@ class extends Component
     }
 };
 ?>
+
 
 @push('styles')
 <style>
@@ -91,6 +101,7 @@ class extends Component
         50%       { transform: translateY(-4px) scale(1.02); }
     }
 
+
     .anim-hero-title  { animation: fadeUp  0.8s cubic-bezier(0.16,1,0.3,1) both; }
     .anim-hero-meta   { animation: fadeUp  0.8s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
     .anim-hero-stats  { animation: fadeUp  0.8s cubic-bezier(0.16,1,0.3,1) 0.28s both; }
@@ -98,6 +109,7 @@ class extends Component
     .anim-section     { animation: fadeUp  0.7s cubic-bezier(0.16,1,0.3,1) both; }
     .anim-fade        { animation: fadeIn  0.5s ease both; }
     .anim-scale-in    { animation: scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+
 
     /* ── Property cards ── */
     .prop-card {
@@ -128,6 +140,7 @@ class extends Component
         filter: brightness(1.05) saturate(1.2);
     }
 
+
     /* ── Service cards ── */
     .svc-card {
         background: rgba(255,255,255,0.03);
@@ -150,6 +163,7 @@ class extends Component
     }
     .svc-card:hover { transform: translateY(-4px); border-color: rgba(var(--color-brand-400),0.25); }
     .svc-card:hover::before { opacity: 1; }
+
 
     /* ── Gallery modal ── */
     .gallery-modal-overlay {
@@ -177,6 +191,7 @@ class extends Component
     .gm-item:nth-child(6)   { grid-column: span 5; grid-row: span 2; }
     .gm-item:nth-child(n+7) { grid-column: span 3; grid-row: span 2; }
 
+
     /* ── Gallery hero strip (teaser) ── */
     .gallery-strip {
         display: grid;
@@ -191,10 +206,12 @@ class extends Component
         grid-row: 1 / 3;
     }
 
+
     /* ── Floating gallery button ── */
     .gallery-pill {
         animation: floatPulse 3s ease-in-out infinite;
     }
+
 
     /* ── Tab pill nav ── */
     .tab-pill {
@@ -220,11 +237,13 @@ class extends Component
         box-shadow: 0 0 16px rgba(var(--color-brand-500), 0.25);
     }
 
+
     /* ── Section divider ── */
     .section-rule {
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1) 30%, rgba(255,255,255,0.1) 70%, transparent);
     }
+
 
     /* ── Lightbox within gallery modal ── */
     .lb-inner {
@@ -237,6 +256,7 @@ class extends Component
         justify-content: center;
         animation: fadeIn 0.2s ease;
     }
+
 
     @media (max-width: 768px) {
         .gallery-masonry {
@@ -253,6 +273,7 @@ class extends Component
 </style>
 @endpush
 
+
 <div
     class="relative z-10 min-h-screen"
     x-data="{
@@ -260,6 +281,7 @@ class extends Component
         lightboxSrc: null,
         lightboxIndex: 0,
         galleryImages: {{ Js::from(collect($galleryImages)->map(fn($p) => Storage::url($p))->values()) }},
+
 
         openGallery() {
             this.galleryOpen = true;
@@ -288,6 +310,7 @@ class extends Component
     @keydown.arrow-right.window="lightboxSrc && nextImage()"
 >
 
+
     {{-- ══════════════════════════════════════════════
          GALLERY MODAL (full-screen overlay)
     ══════════════════════════════════════════════ --}}
@@ -299,6 +322,7 @@ class extends Component
          x-transition:leave="transition-opacity duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
+
 
         {{-- Modal header --}}
         <div class="flex-none flex items-center justify-between px-8 py-5 border-b border-white/8">
@@ -325,6 +349,7 @@ class extends Component
                 </button>
             </div>
         </div>
+
 
         {{-- Gallery grid --}}
         <div class="flex-1 overflow-y-auto p-6 md:p-8">
@@ -354,6 +379,7 @@ class extends Component
             @endif
         </div>
 
+
         {{-- Gallery subtitle strip --}}
         @if($gallerySubtitle)
             <div class="flex-none border-t border-white/8 px-8 py-3 text-xs text-white/30 italic">
@@ -361,6 +387,7 @@ class extends Component
             </div>
         @endif
     </div>
+
 
     {{-- ══════════════════════════════════════════════
          LIGHTBOX (within gallery modal)
@@ -383,10 +410,12 @@ class extends Component
         </button>
     </div>
 
+
     {{-- ══════════════════════════════════════════════
          HERO
     ══════════════════════════════════════════════ --}}
     <section class="relative min-h-[72vh] flex items-end overflow-hidden pb-16 md:pb-20">
+
 
         {{-- Background --}}
         @if($coverPhoto)
@@ -397,15 +426,19 @@ class extends Component
             <div class="absolute inset-0 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950"></div>
         @endif
 
+
         {{-- Layered gradients for depth --}}
         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+
 
         {{-- Noise grain --}}
         <div class="absolute inset-0 opacity-[0.035]"
              style="background-image: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\"); background-size: 180px;"></div>
 
+
         <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-16 w-full">
+
 
             {{-- Back link --}}
             <div class="anim-hero-meta mb-8">
@@ -416,7 +449,9 @@ class extends Component
                 </a>
             </div>
 
+
             <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
+
 
                 {{-- Left: Headline --}}
                 <div class="max-w-2xl">
@@ -431,6 +466,7 @@ class extends Component
                     <p class="anim-hero-meta mt-4 text-sm text-white/45 max-w-sm leading-relaxed">
                         Discover our spaces and services — crafted for comfort, built for memory.
                     </p>
+
 
                     {{-- Stats --}}
                     <div class="anim-hero-stats mt-8 flex items-center gap-6">
@@ -453,9 +489,11 @@ class extends Component
                     </div>
                 </div>
 
+
                 {{-- Right: Gallery teaser + CTA --}}
                 @if(!empty($galleryImages))
                     <div class="anim-hero-ctas flex flex-col items-start lg:items-end gap-5">
+
 
                         {{-- Mini gallery preview strip --}}
                         <div class="gallery-strip w-full lg:w-80 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
@@ -468,6 +506,7 @@ class extends Component
                                 </div>
                             @endforeach
                         </div>
+
 
                         {{-- Gallery open button --}}
                         <button @click="openGallery()"
@@ -482,9 +521,11 @@ class extends Component
                     </div>
                 @endif
 
+
             </div>
         </div>
     </section>
+
 
     {{-- ══════════════════════════════════════════════
          TAB NAV (pill style, floating)
@@ -504,6 +545,7 @@ class extends Component
                 </button>
             </div>
 
+
             {{-- Quick gallery trigger in nav --}}
             @if(!empty($galleryImages))
                 <button @click="openGallery()"
@@ -515,10 +557,12 @@ class extends Component
         </div>
     </div>
 
+
     {{-- ══════════════════════════════════════════════
          MAIN CONTENT
     ══════════════════════════════════════════════ --}}
     <div class="max-w-7xl mx-auto px-6 md:px-16 py-12 md:py-16">
+
 
         {{-- ── ACCOMMODATIONS ── --}}
         @if($activeTab === 'accommodations')
@@ -533,10 +577,12 @@ class extends Component
                 <p class="mt-2 text-sm text-white/40 max-w-md">All rooms shown are immediately bookable for your stay.</p>
             </div>
 
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($this->properties as $index => $property)
                     <div class="prop-card flex flex-col" wire:key="prop-{{ $property->id }}"
                          style="animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) {{ $index * 80 }}ms both">
+
 
                         {{-- Image area --}}
                         <div class="prop-card-image">
@@ -548,6 +594,7 @@ class extends Component
                                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 </div>
                             @endif
+
 
                             {{-- Badges --}}
                             <div class="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -562,6 +609,7 @@ class extends Component
                                 Available
                             </span>
 
+
                             {{-- Image count indicator if multiple --}}
                             @if($property->images->count() > 1)
                                 <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-[10px] text-white/60 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -570,6 +618,7 @@ class extends Component
                                 </span>
                             @endif
                         </div>
+
 
                         {{-- Card body --}}
                         <div class="p-5 flex flex-col flex-1">
@@ -583,6 +632,7 @@ class extends Component
                             @else
                                 <div class="flex-1"></div>
                             @endif
+
 
                             {{-- Price + CTA (fixed – visible price and clearer night label) --}}
                             <div class="flex items-center justify-between pt-4 mt-auto"
@@ -618,6 +668,7 @@ class extends Component
             </div>
         @endif
 
+
         {{-- ── SERVICES ── --}}
         @if($activeTab === 'services')
             <div class="anim-section mb-10">
@@ -631,23 +682,28 @@ class extends Component
                 <p class="mt-2 text-sm text-white/40 max-w-md">Extras available to make your stay even more special.</p>
             </div>
 
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 @forelse($this->services as $index => $service)
                     <div class="svc-card flex flex-col" wire:key="svc-{{ $service->id }}"
                          style="animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) {{ $index * 70 }}ms both">
+
 
                         {{-- Icon --}}
                         <div class="w-10 h-10 rounded-xl bg-brand-500/15 border border-brand-400/20 flex items-center justify-center text-brand-400 mb-4 flex-none">
                             <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                         </div>
 
+
                         <h3 class="font-display text-lg font-semibold text-white mb-2 leading-snug">{{ $service->name }}</h3>
+
 
                         @if($service->description)
                             <p class="text-sm text-white/50 flex-1 mb-5 leading-relaxed">{{ $service->description }}</p>
                         @else
                             <div class="flex-1 mb-5"></div>
                         @endif
+
 
                         <div class="flex items-center justify-between pt-4 mt-auto"
                              style="border-top: 1px solid rgba(255,255,255,0.07)">
@@ -677,7 +733,9 @@ class extends Component
             </div>
         @endif
 
+
     </div>
+
 
     {{-- ══════════════════════════════════════════════
          GALLERY SECTION FOOTER TEASER
@@ -705,4 +763,8 @@ class extends Component
         </section>
     @endif
 
+
 </div>
+
+
+

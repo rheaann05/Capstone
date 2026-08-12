@@ -1,19 +1,24 @@
 @import 'tailwindcss';
 
+
 @custom-variant dark (&:where(.dark, .dark *));
+
 
 @import "../../node_modules/preline/variants.css";
 @source "../../node_modules/preline/dist/*.js";
+
 
 @source '../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../../../**/*.js';
 
+
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Playfair Display', Georgia, serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
 
     /* Brand colours – nature, coastal, tropical */
     --color-brand-50:   #f0fdf4;
@@ -25,27 +30,33 @@
     --color-brand-900:  #1B4332;
     --color-brand-950:  #0C1F14;
 
+
     --color-accent-400: #facc15;   /* sun yellow */
     --color-accent-500: #f59e0b;
     --color-accent-600: #d97706;
+
 
     /* Glass & surface tokens */
     --color-glass-primary: rgba(255, 255, 255, 0.06);
     --color-glass-border:  rgba(255, 255, 255, 0.12);
     --color-glass-shadow:  0 8px 30px rgba(0, 0, 0, 0.25);
 
+
     --color-ocean: #06b6d4;   /* cyan */
     --color-sun:   #facc15;   /* yellow */
 }
+
 
 @layer base {
     button:not(:disabled),
     [role="button"]:not(:disabled) { cursor: pointer; }
 
+
     :root {
         color-scheme: light dark;
         scroll-behavior: smooth;
     }
+
 
     /* Light theme (default) */
     body {
@@ -53,12 +64,14 @@
         color: #1A1917;
     }
 
+
     /* Dark theme overrides – applied only when <html class="dark"> */
     html.dark body {
         background: #071412;
         color: #e2e8f0;
     }
 }
+
 
 /* ─── Glassmorphism utilities (used anywhere) ─── */
 .glass {
@@ -87,6 +100,7 @@
     border-color: rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
 }
+
 
 /* ─── Animated background orbs ─── */
 .orb {
@@ -120,10 +134,12 @@
     100% { transform: translate(30px, 40px) scale(1.1); }
 }
 
+
 /* Smooth universal transitions */
 * {
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
 
 /* Scroll reveal animation */
 .reveal {
@@ -136,6 +152,7 @@
     transform: translateY(0);
 }
 
+
 /* ─── Status badges (dark‑ready) ─── */
 .badge-pending   { @apply bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30; }
 .badge-confirmed { @apply bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-500/30; }
@@ -143,9 +160,18 @@
 .badge-completed { @apply bg-gray-100 dark:bg-gray-500/15 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-500/30; }
 .badge-cancelled { @apply bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-500/30; }
 
+
 /* ─── Input base (glass variant) ─── */
 .input-glass {
     @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40
            focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400/50
            transition-colors duration-200;
 }
+
+
+/* Fix invisible dropdown options in glass‑style selects (dark‑mode awareness) */
+select option {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
